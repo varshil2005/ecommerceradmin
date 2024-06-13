@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, Pressable } from 'react-native'
 import React, { useState } from 'react'
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler'
 import Modal from 'react-native-modal';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 
 export default function Category() {
@@ -38,7 +40,26 @@ export default function Category() {
                 <Text style={{ textAlign: 'center', paddingTop: 7, color: 'white' }}>ADD Category</Text>
             </TouchableOpacity>
 
+            <View style={style.listmainview}>
+                <View style = {style.listname}>
+                    <Text style = {style.listtext}>Men</Text>
+                    <View style = {{flexDirection : 'row' , marginRight : 10 }}>
+                       <TouchableOpacity  style = {{marginRight : 20}}><Text><EvilIcons name = 'pencil' size  = {35} color ='black'></EvilIcons></Text></TouchableOpacity> 
+                        <TouchableOpacity><Text><MaterialIcons name = 'delete' size = {30} color = 'red'></MaterialIcons></Text></TouchableOpacity>
+                    </View>
+                </View>
+
+                <View style = {style.listname}>
+                    <Text style = {style.listtext}>Men</Text>
+                    <View style = {{flexDirection : 'row' , marginRight : 10 }}>
+                       <TouchableOpacity  style = {{marginRight : 20}}><Text><EvilIcons name = 'pencil' size  = {35} color ='black'></EvilIcons></Text></TouchableOpacity> 
+                        <TouchableOpacity><Text><MaterialIcons name = 'delete' size = {30} color = 'red'></MaterialIcons></Text></TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+
         </View>
+        
 
 
     )
@@ -111,6 +132,38 @@ const style = StyleSheet.create({
         fontSize :20,
         color : 'black'
     },
+
+    listmainview : {
+        width : '90%',
+        // borderWidth : 2,
+        // borderColor : 'white',
+        marginHorizontal : 'auto',
+        marginTop : 70,
+        // backgroundColor : 'white',
+    },
+
+    listtext : {
+        fontSize : 20,
+        color : 'green'
+    },
+
+    listname  : {
+        flexDirection : 'row',
+        alignItems : 'center',
+        justifyContent : 'space-between',
+        backgroundColor : 'white',
+        padding : 7,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 3,
+        marginBottom : 10
+       
+    }
 })
 
 
