@@ -40,7 +40,7 @@ export default function Category() {
     const getData = async () => {
     
 
-        if (isconnected) {
+        if(isconnected) {
             const respones = await fetch("https://dummyjson.com/products/categories");
             const data =await respones.json();
             setdata(data)
