@@ -2,20 +2,31 @@ import { View, Text, StyleSheet, Modal, Pressable, TouchableOpacity } from 'reac
 import React, { useState } from 'react'
 import { object, string, number, date, InferType, array } from 'yup';
 import { useFormik, validateYupSchema } from 'formik';
-import { TextInput } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { RadioButton } from 'react-native-paper';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { CheckBox } from 'react-native-elements';
 
 export default function Category1() {
     const [update, setupdate] = useState(null)
     const [modalVisible, setModalVisible] = useState(false);
+    const [selectedValue, setSelectedValue] = useState('option1');
+    const [isSelected, setSelection] = useState(false);
+
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState(null);
+    const [items, setItems] = useState([
+        { label: 'Men', value: 'men' },
+        { label: 'Women', value: 'women' },
+        { label: 'Mens Shirt', value: 'mens shirt' },
+    ]);
 
     let userSchema = object({
-        name: string().required(),
-        age: number().positive().required().integer().min(18),
-        email: string().email().required(),
-        number : number().required().integer().positive(),
-        password : string().required().matches("^(?=.*[A-Za-z])(?=.*d)(?=.*[@$!%*#?&])[A-Za-zd@$!%*#?&]{8,}$",
-            "Must Contain 8 Characters, One Number and one special case Character"
-        )
+        name: string().required("Please enter name").matches(/^[a-zA-Z ]+$/, "Please enter valid name"),
+        email: string().required().email(),
+        number: string().required().matches(/^\d{10}$/, "Mobile number must be 10 digit"),
+        age: number().required().min(18, "Minimum 18 age allowed").typeError("Please enter age in digit"),
+        password: string().required().matches(/^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]{8,}$/, "Password must be 8 combination of alpabet, digit and special symbol.")
     });
 
     const formik = useFormik({
@@ -23,8 +34,8 @@ export default function Category1() {
             name: '',
             age: '',
             email: '',
-            number : '',
-            password : ''
+            number: '',
+            password: ''
         },
         validationSchema: userSchema,
         onSubmit: values => {
@@ -38,7 +49,7 @@ export default function Category1() {
 
 
     return (
-        <View>
+        <ScrollView>
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -111,22 +122,83 @@ export default function Category1() {
                         ></TextInput>
                         <Text style={{ color: 'red', }}>{errors ? errors.password : ''}
                         </Text>
+                        <View style={style.radioButton}>
+                            <RadioButton.Android
+                                value="option2"
+                                status={selectedValue === 'option2' ?
+                                    'checked' : 'unchecked'}
+                                onPress={() => setSelectedValue('option2')}
+                                color="#007BFF"
+                            />
+                            <Text style={style.radioLabel}>
+                                NextJs
+                            </Text>
+                        </View>
 
-                        <Pressable style={style.submitbutton} onPress={() => handleSubmit()}>
-                            <Text style={{ textAlign: 'center', paddingTop: 7, color: 'white' }}> {update ? 'Update' : 'Submit'}</Text>
-                        </Pressable>
+                        <View style={style.radioButton}>
+                            <RadioButton.Android
+                                value="option3"
+                                status={selectedValue === 'option3' ?
+                                    'checked' : 'unchecked'}
+                                onPress={() => setSelectedValue('option3')}
+                                color="#007BFF"
+                            />
+                            <Text style={style.radioLabel}>
+                                React Native
+                            </Text>
+                        </View>
+
+                        {/* <View
+                            style={{
+                                width: 200,
+                                position: 'relative',
+                                zIndex: 1000,
+                                paddingHorizontal: 15,
+                            }}>
+
+                            <DropDownPicker
+                                open={open}
+                                value={value}
+                                items={items}
+                                setOpen={setOpen}
+                                setValue={setValue}
+                                setItems={setItems}
+                                placeholder={'Choose Category.'}
+                            />
+
+                        </View> */}
+
+                        <View style={style.container}>
+                            <View style={style.checkboxContainer}>
+                                <Text>hiii</Text>
+                                <CheckBox
+                                    value={isSelected}
+                                    onValueChange={setSelection}
+                                    style={style.checkbox}
+                                />
+
+                            </View>
+
+                            <Pressable style={style.submitbutton} onPress={() => handleSubmit()}>
+                                <Text style={{ textAlign: 'center', paddingTop: 7, color: 'white' }}> {update ? 'Update' : 'Submit'}</Text>
+                            </Pressable>
+
+
+                        </View>
                     </View>
-                </View>
-
-
+                    </View>
             </Modal>
 
+          
+
+
             <Pressable
-                style={[style.button, style.buttonOpen]}
+                style={[style.button]}
                 onPress={() => setModalVisible(true)}>
                 <Text style={style.textStyle}>Show Modal</Text>
             </Pressable>
-        </View>
+
+        </ScrollView>
     )
 }
 
@@ -168,7 +240,7 @@ const style = StyleSheet.create({
     },
 
     modalText: {
-        marginBottom: 15,
+        marginBottom: 10,
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: 20,
@@ -216,7 +288,7 @@ const style = StyleSheet.create({
         right: 15,
         borderRadius: 20,
         elevation: 4,
-        backgroundColor: '#F194FF',
+        backgroundColor: 'red',
     },
 
     submitbutton: {
@@ -227,6 +299,29 @@ const style = StyleSheet.create({
         elevation: 2,
         backgroundColor: '#F194FF',
     },
+
+    radioButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    radioLabel: {
+        marginRight: 10,
+        fontSize: 16,
+        color: '#333',
+    },
+
+    container: {
+        // flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      checkboxContainer: {
+        flexDirection: 'row',
+        marginBottom: 20,
+      },
+      checkbox: {
+        alignSelf: 'center',
+      },
 
 
 })
