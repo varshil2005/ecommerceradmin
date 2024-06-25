@@ -1,4 +1,11 @@
-import {View, Text, StyleSheet, Modal, Pressable} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  Pressable,
+  TouchableOpacity,
+} from 'react-native';
 import React, {useState} from 'react';
 import {object, string, number, date, InferType, array, boolean} from 'yup';
 import {useFormik, validateYupSchema, yupToFormErrors} from 'formik';
@@ -6,7 +13,11 @@ import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import {RadioButton} from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import * as Yup from 'yup';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Category1() {
   const [update, setupdate] = useState(null);
@@ -14,7 +25,7 @@ export default function Category1() {
   const [selectedValue, setSelectedValue] = useState('option1');
   const [isSelecteds, setSelection] = useState(false);
   const [selectdrop, setSelectdrop] = useState('');
-
+  const [data, setdata] = useState([]);
 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
@@ -29,19 +40,19 @@ export default function Category1() {
       .required('Please enter name')
       .matches(/^[a-zA-Z ]+$/, 'Please enter valid name'),
 
-    email:  Yup.string().required().email(),
-    number:  Yup.string()
+    email: Yup.string().required().email(),
+    number: Yup.string()
       .required()
       .matches(/^\d{10}$/, 'Mobile number must be 10 digit'),
 
-    age:  Yup.number()
+    age: Yup.number()
       .required()
 
       .min(18, 'Minimum 18 age allowed')
 
       .typeError('Please enter age in digit'),
 
-    password:  Yup.string()
+    password: Yup.string()
       .required()
 
       .matches(
@@ -50,9 +61,11 @@ export default function Category1() {
         'Password must be 8 combination of alpabet, digit and special symbol.',
       ),
 
-    checkbox: Yup.boolean().required('Please select the checkbox').oneOf([true]),
+    checkbox: Yup.boolean()
+      .required('Please select the checkbox')
+      .oneOf([true]),
     radiobutton: Yup.string().required('Please select at list one'),
-    dropdown: Yup.string().required('Please select category')
+    dropdown: Yup.string().required('Please select category'),
   });
 
   const formik = useFormik({
@@ -69,16 +82,67 @@ export default function Category1() {
 
     validationSchema: userSchema,
 
-    onSubmit: values => {
+    onSubmit: async (values) => {
       console.log(values);
       setModalVisible(!modalVisible);
+
+      const getdata = await AsyncStorage.getItem('data');
+      console.log(getdata);
+
+     
+      if (getdata) {
+        console.log("ffffffffffffffffffff");
+        const asydata = JSON.parse(getdata);
+        asydata.push(
+          {
+            id: Math.floor(Math.random() * 1000),
+            name: values.name,
+            age: values.age,
+            number: values.number,
+            email: values.email,
+            password: values.password,
+            checkbox: values.checkbox,
+            dropdown: values.dropdown,
+            radioButton: values.radiobutton,
+          },
+        );
+        await AsyncStorage.setItem("data", JSON.stringify(asydata));
+        setdata(asydata);
+      } else {
+        let data = [
+          {
+            id: Math.floor(Math.random() * 1000),
+            name: values.name,
+            age: values.age,
+            number: values.number,
+            email: values.email,
+            password: values.password,
+            checkbox: values.checkbox,
+            dropdown: values.dropdown,
+            radioButton: values.radiobutton,
+          },
+        ];
+        console.log('data', data);
+
+        await AsyncStorage.setItem("data", JSON.stringify(data));
+        setdata(data);
+      }
     },
   });
 
-  const {handleChange, errors, values, handleSubmit , setFieldValue} = formik;
+  const handleDelete = async(id) => {
+    console.log(id);
+    const getdata = await AsyncStorage.getItem("data");
+    const fdata = JSON.parse(getdata).filter((v,i) => v.id !== id);
 
-  console.log(errors);
-  console.log(values);
+    await AsyncStorage.setItem("category", JSON.stringify(fdata))
+      setdata(fdata)
+  }
+
+  const {handleChange, errors, values, handleSubmit, setFieldValue} = formik;
+
+  // console.log(errors);
+  // console.log(values);
   return (
     <ScrollView>
       <Modal
@@ -160,10 +224,12 @@ export default function Category1() {
               <RadioButton.Android
                 value="option2"
                 status={selectedValue === 'option2' ? 'checked' : 'unchecked'}
-                onPress={() =>{ setSelectedValue('option2');setFieldValue('radiobutton' , 'NextJs')}}
+                onPress={() => {
+                  setSelectedValue('option2');
+                  setFieldValue('radiobutton', 'NextJs');
+                }}
                 color="#007BFF"
                 onChangeText={handleChange('radiobutton')}
-                
               />
 
               <Text style={style.radioLabel}>NextJs</Text>
@@ -173,7 +239,10 @@ export default function Category1() {
               <RadioButton.Android
                 value="option3"
                 status={selectedValue === 'option3' ? 'checked' : 'unchecked'}
-                onPress={() =>{ setSelectedValue('option3');setFieldValue('radiobutton' , 'React Native')}}
+                onPress={() => {
+                  setSelectedValue('option3');
+                  setFieldValue('radiobutton', 'React Native');
+                }}
                 color="#007BFF"
                 onChangeText={handleChange('radiobutton')}
               />
@@ -182,10 +251,8 @@ export default function Category1() {
             </View>
 
             <Text style={{color: 'red', marginBottom: 20}}>
-             
               {selectedValue ? '' : errors.radiobutton}
             </Text>
-            
 
             <View
               style={{
@@ -204,7 +271,7 @@ export default function Category1() {
                 placeholder={'Choose Category.'}
                 onPress={() => setSelectdrop(!selectdrop)}
                 onChangeText={handleChange('dropdown')}
-                onSelectItem={(items) => setFieldValue('dropdown',items.value)}
+                onSelectItem={items => setFieldValue('dropdown', items.value)}
               />
             </View>
 
@@ -220,12 +287,15 @@ export default function Category1() {
               iconStyle={{borderColor: 'red'}}
               innerIconStyle={{borderWidth: 2}}
               textStyle={{fontFamily: 'JosefinSans-Regular'}}
-              onPress={() => {setSelection(!isSelecteds); setFieldValue('checkbox',!isSelecteds)}}
+              onPress={() => {
+                setSelection(!isSelecteds);
+                setFieldValue('checkbox', !isSelecteds);
+              }}
               onChangeText={handleChange('checkbox')}
             />
 
             <Text style={{color: 'red'}}>
-              {isSelecteds ? '' : errors.checkbox}
+              {!isSelecteds ? errors.checkbox : ''}
             </Text>
 
             <Pressable
@@ -244,6 +314,27 @@ export default function Category1() {
       <Pressable style={style.button} onPress={() => setModalVisible(true)}>
         <Text style={style.textStyle}>Show Modal</Text>
       </Pressable>
+
+      {data.map((v, i) => (
+        <View style={style.listname} key={v.id}>
+          <Text style={style.listtext}>{v.name}</Text>
+          <View style={{flexDirection: 'row', marginRight: 10}}>
+            <TouchableOpacity
+              style={{marginRight: 20}}
+              onPress={() => handleedit(v.id)}>
+              <EvilIcons name="pencil" size={35} color="black"></EvilIcons>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleDelete(v.id)}>
+              <Text>
+                <MaterialIcons
+                  name="delete"
+                  size={30}
+                  color="red"></MaterialIcons>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ))}
     </ScrollView>
   );
 }
@@ -257,121 +348,80 @@ const style = StyleSheet.create({
 
   input: {
     width: 190,
-
     padding: 15,
-
     shadowOffset: {
       width: 0,
-
       height: 2,
     },
-
     shadowOpacity: 0.25,
-
     shadowRadius: 4,
-
     elevation: 0.5,
-
     color: 'black',
-
     // backgroundColor : 'red'
   },
 
   centeredView: {
     flex: 1,
-
     justifyContent: 'center',
-
     alignItems: 'center',
-
     marginTop: 22,
   },
 
   modalView: {
     width: 250,
-
     margin: 20,
-
     backgroundColor: 'white',
-
     borderRadius: 20,
-
     padding: 20,
-
     alignItems: 'center',
-
     shadowColor: '#000',
-
     shadowOffset: {
       width: 0,
-
       height: 2,
     },
 
     shadowOpacity: 0.25,
-
     shadowRadius: 4,
-
     elevation: 5,
   },
 
   modalText: {
     marginBottom: 10,
-
     textAlign: 'center',
-
     fontWeight: 'bold',
-
     fontSize: 20,
-
     color: 'black',
   },
 
   listmainview: {
     width: '90%',
-
     // borderWidth : 2,
-
     // borderColor : 'white',
-
     marginHorizontal: 'auto',
-
     marginTop: 70,
-
     // backgroundColor : 'white',
   },
 
   listtext: {
     fontSize: 20,
-
-    color: 'green',
+    color: 'red',
   },
 
   listname: {
     flexDirection: 'row',
-
     alignItems: 'center',
-
     justifyContent: 'space-between',
-
     backgroundColor: 'white',
-
     padding: 7,
-
     shadowColor: '#000',
-
     shadowOffset: {
       width: 0,
-
       height: 2,
     },
 
     shadowOpacity: 0.25,
-
     shadowRadius: 4,
-
     elevation: 3,
-
     marginBottom: 10,
   },
 
@@ -383,47 +433,37 @@ const style = StyleSheet.create({
     borderRadius: 20,
     elevation: 4,
     backgroundColor: '#F194FF',
+    marginBottom: 30,
   },
 
   submitbutton: {
     width: 120,
-
     marginTop: 20,
-
     height: 35,
-
     borderRadius: 20,
-
     elevation: 2,
-
     backgroundColor: '#F194FF',
   },
 
   radioButton: {
     flexDirection: 'row',
-
     alignItems: 'center',
   },
 
   radioLabel: {
     marginRight: 10,
-
     fontSize: 16,
-
     color: '#333',
   },
 
   container: {
     // flex: 1,
-
     alignItems: 'center',
-
     justifyContent: 'center',
   },
 
   checkboxContainer: {
     flexDirection: 'row',
-
     marginBottom: 20,
   },
 
@@ -433,5 +473,36 @@ const style = StyleSheet.create({
 
   textStyle: {
     color: 'red',
+  },
+
+  listmainview: {
+    width: '90%',
+    // borderWidth : 2,
+    // borderColor : 'white',
+    marginHorizontal: 'auto',
+    marginTop: 70,
+    // backgroundColor : 'white',
+  },
+
+  listtext: {
+    fontSize: 20,
+    color: 'green',
+  },
+
+  listname: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'white',
+    padding: 7,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 10,
   },
 });
