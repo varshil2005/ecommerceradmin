@@ -6,7 +6,7 @@ import {
   Pressable,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {object, string, number, date, InferType, array, boolean} from 'yup';
 import {useFormik, validateYupSchema, yupToFormErrors} from 'formik';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
@@ -35,37 +35,26 @@ export default function Category1() {
     {label: 'Mens Shirt', value: 'mens shirt'},
   ]);
 
+  // useEffect( async() => {
+  //   await AsyncStorage.setItem("data", JSON.stringify(null));
+  // },[])
+
+
+
+    // AsyncStorage.setItem("data", JSON.stringify(null));
+
   let userSchema = object({
-    name: Yup.string()
-      .required('Please enter name')
-      .matches(/^[a-zA-Z ]+$/, 'Please enter valid name'),
-
-    email: Yup.string().required().email(),
-    number: Yup.string()
-      .required()
-      .matches(/^\d{10}$/, 'Mobile number must be 10 digit'),
-
-    age: Yup.number()
-      .required()
-
-      .min(18, 'Minimum 18 age allowed')
-
-      .typeError('Please enter age in digit'),
-
-    password: Yup.string()
-      .required()
-
-      .matches(
+    name: string().required('Please enter name').matches(/^[a-zA-Z ]+$/, 'Please enter valid name'),
+    email: string().required().email(),
+    number: string().required().matches(/^\d{10}$/, 'Mobile number must be 10 digit'),
+    age: number().required().min(18, 'Minimum 18 age allowed').typeError('Please enter age in digit'),
+    password: string().required().matches(
         /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-
         'Password must be 8 combination of alpabet, digit and special symbol.',
       ),
-
-    checkbox: Yup.boolean()
-      .required('Please select the checkbox')
-      .oneOf([true]),
-    radiobutton: Yup.string().required('Please select at list one'),
-    dropdown: Yup.string().required('Please select category'),
+    checkbox: boolean().required('Please select the checkbox').oneOf([true]),
+    radiobutton: string().required('Please select at list one'),
+    dropdown: string().required('Please select category'),
   });
 
   const formik = useFormik({
@@ -82,19 +71,19 @@ export default function Category1() {
 
     validationSchema: userSchema,
 
-    onSubmit: async (values) => {
+    onSubmit: async (values, {resetForm}) => {
       console.log(values);
       setModalVisible(!modalVisible);
 
-      const getdata = await AsyncStorage.getItem('data');
-      console.log(getdata);
+      const getdata = await AsyncStorage.getItem("data");
+      console.log("gpgggg",getdata);
 
      
-      if (getdata) {
+      if (getdata !== null) {
+       
         console.log("ffffffffffffffffffff");
         const asydata = JSON.parse(getdata);
-        asydata.push(
-          {
+        asydata.push({ 
             id: Math.floor(Math.random() * 1000),
             name: values.name,
             age: values.age,
@@ -104,8 +93,9 @@ export default function Category1() {
             checkbox: values.checkbox,
             dropdown: values.dropdown,
             radioButton: values.radiobutton,
-          },
-        );
+          }
+        )
+
         await AsyncStorage.setItem("data", JSON.stringify(asydata));
         setdata(asydata);
       } else {
@@ -120,13 +110,15 @@ export default function Category1() {
             checkbox: values.checkbox,
             dropdown: values.dropdown,
             radioButton: values.radiobutton,
-          },
-        ];
+          }
+        ]
         console.log('data', data);
 
         await AsyncStorage.setItem("data", JSON.stringify(data));
         setdata(data);
       }
+
+      resetForm();
     },
   });
 
@@ -136,12 +128,19 @@ export default function Category1() {
     const fdata = JSON.parse(getdata).filter((v,i) => v.id !== id);
 
     await AsyncStorage.setItem("category", JSON.stringify(fdata))
-      setdata(fdata)
+    setdata(fdata)
   }
 
-  const {handleChange, errors, values, handleSubmit, setFieldValue} = formik;
+  
 
-  // console.log(errors);
+  const {handleChange, errors, values, handleSubmit, setFieldValue, setValues} = formik;
+
+  // const handleedit = (data) => {
+    
+  //   setValues(data)
+  // }
+
+  //  console.log(errors);
   // console.log(values);
   return (
     <ScrollView>
@@ -170,7 +169,7 @@ export default function Category1() {
               onChangeText={handleChange('name')}
               value={values.name}></TextInput>
 
-            <Text style={{color: 'red'}}>{errors ? errors.name : ''} </Text>
+            <Text style={{color: 'red'}}>{errors.name ? errors.name : ''} </Text>
 
             <TextInput
               placeholder="Age"
@@ -182,7 +181,7 @@ export default function Category1() {
               // required = {values.}
             ></TextInput>
 
-            <Text style={{color: 'red'}}>{errors ? errors.age : ''}</Text>
+            <Text style={{color: 'red'}}>{errors.age ? errors.age  : ''}</Text>
 
             <TextInput
               placeholder="email"
@@ -194,7 +193,7 @@ export default function Category1() {
               // required = {values.}
             ></TextInput>
 
-            <Text style={{color: 'red'}}>{errors ? errors.email : ''}</Text>
+            <Text style={{color: 'red'}}>{errors.email ? errors.email : ''}</Text>
 
             <TextInput
               placeholder="Mobile Number"
@@ -206,7 +205,7 @@ export default function Category1() {
               // required = {values.}
             ></TextInput>
 
-            <Text style={{color: 'red'}}>{errors ? errors.number : ''}</Text>
+            <Text style={{color: 'red'}}>{errors.number ? errors.number : ''}</Text>
 
             <TextInput
               placeholder="Password"
@@ -218,7 +217,7 @@ export default function Category1() {
               // required = {values.}
             ></TextInput>
 
-            <Text style={{color: 'red'}}>{errors ? errors.password : ''}</Text>
+            <Text style={{color: 'red'}}>{errors.password ? errors.password : ''}</Text>
 
             <View style={style.radioButton}>
               <RadioButton.Android
@@ -251,7 +250,7 @@ export default function Category1() {
             </View>
 
             <Text style={{color: 'red', marginBottom: 20}}>
-              {selectedValue ? '' : errors.radiobutton}
+              {!selectedValue ? '' : errors.radiobutton}
             </Text>
 
             <View
@@ -276,7 +275,7 @@ export default function Category1() {
             </View>
 
             <Text style={{color: 'red', marginBottom: 20}}>
-              {selectdrop ? '' : errors.dropdown}
+              {!selectdrop ? '' : errors.dropdown}
             </Text>
 
             <BouncyCheckbox
@@ -321,7 +320,7 @@ export default function Category1() {
           <View style={{flexDirection: 'row', marginRight: 10}}>
             <TouchableOpacity
               style={{marginRight: 20}}
-              onPress={() => handleedit(v.id)}>
+              onPress={() => handleedit(v)}>
               <EvilIcons name="pencil" size={35} color="black"></EvilIcons>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleDelete(v.id)}>
