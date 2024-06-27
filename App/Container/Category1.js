@@ -133,7 +133,7 @@ export default function Category1() {
 
   
 
-  const {handleChange, errors, values, handleSubmit, setFieldValue, setValues} = formik;
+  const {handleChange, errors, values, handleSubmit, setFieldValue, setValues , touched , handleBlur} = formik;
 
   // const handleedit = (data) => {
     
@@ -167,9 +167,10 @@ export default function Category1() {
               placeholderTextColor={'black'}
               style={style.input}
               onChangeText={handleChange('name')}
+              onBlur={handleBlur('name')}
               value={values.name}></TextInput>
 
-            <Text style={{color: 'red'}}>{errors.name ? errors.name : ''} </Text>
+            <Text style={{color: 'red'}}>{errors.name && touched.name ? errors.name : ''} </Text>
 
             <TextInput
               placeholder="Age"
@@ -177,11 +178,11 @@ export default function Category1() {
               style={style.input}
               onChangeText={handleChange('age')}
               value={values.age}
-
+              onBlur={handleBlur('age')}
               // required = {values.}
             ></TextInput>
 
-            <Text style={{color: 'red'}}>{errors.age ? errors.age  : ''}</Text>
+            <Text style={{color: 'red'}}>{errors.age  && touched.age ? errors.age  : ''}</Text>
 
             <TextInput
               placeholder="email"
@@ -189,11 +190,12 @@ export default function Category1() {
               style={style.input}
               onChangeText={handleChange('email')}
               value={values.email}
+              onBlur={handleChange('email')}
 
               // required = {values.}
             ></TextInput>
 
-            <Text style={{color: 'red'}}>{errors.email ? errors.email : ''}</Text>
+            <Text style={{color: 'red'}}>{errors.email  && touched.email ? errors.email : ''}</Text>
 
             <TextInput
               placeholder="Mobile Number"
@@ -201,23 +203,25 @@ export default function Category1() {
               style={style.input}
               onChangeText={handleChange('number')}
               value={values.number}
+              onBlur={handleBlur('number')}
 
               // required = {values.}
             ></TextInput>
 
-            <Text style={{color: 'red'}}>{errors.number ? errors.number : ''}</Text>
+            <Text style={{color: 'red'}}>{errors.number  && touched.number ? errors.number : ''}</Text>
 
             <TextInput
               placeholder="Password"
               placeholderTextColor={'black'}
               style={style.input}
               onChangeText={handleChange('password')}
+              onBlur={handleBlur('password')}
               value={values.password}
 
               // required = {values.}
             ></TextInput>
 
-            <Text style={{color: 'red'}}>{errors.password ? errors.password : ''}</Text>
+            <Text style={{color: 'red'}}>{errors.password  && touched.password ? errors.password : ''}</Text>
 
             <View style={style.radioButton}>
               <RadioButton.Android
@@ -229,6 +233,7 @@ export default function Category1() {
                 }}
                 color="#007BFF"
                 onChangeText={handleChange('radiobutton')}
+                // onBlur={handleBlur('radiobutton')}
               />
 
               <Text style={style.radioLabel}>NextJs</Text>
@@ -244,13 +249,14 @@ export default function Category1() {
                 }}
                 color="#007BFF"
                 onChangeText={handleChange('radiobutton')}
+                onBlur={handleBlur('radiobutton')}
               />
 
               <Text style={style.radioLabel}>React Native</Text>
             </View>
 
             <Text style={{color: 'red', marginBottom: 20}}>
-              {!selectedValue ? '' : errors.radiobutton}
+              {!selectedValue  && touched.radioButton ? '' : errors.radiobutton}
             </Text>
 
             <View
@@ -271,11 +277,12 @@ export default function Category1() {
                 onPress={() => setSelectdrop(!selectdrop)}
                 onChangeText={handleChange('dropdown')}
                 onSelectItem={items => setFieldValue('dropdown', items.value)}
+                onBlur={handleBlur('dropdown')}
               />
             </View>
 
             <Text style={{color: 'red', marginBottom: 20}}>
-              {!selectdrop ? '' : errors.dropdown}
+              {!selectdrop && touched.dropdown ? '' : errors.dropdown}
             </Text>
 
             <BouncyCheckbox
@@ -291,10 +298,11 @@ export default function Category1() {
                 setFieldValue('checkbox', !isSelecteds);
               }}
               onChangeText={handleChange('checkbox')}
+              onBlur={handleBlur('checkbox')}
             />
 
             <Text style={{color: 'red'}}>
-              {!isSelecteds ? errors.checkbox : ''}
+              {!isSelecteds && touched.checkbox ? errors.checkbox : ''}
             </Text>
 
             <Pressable
