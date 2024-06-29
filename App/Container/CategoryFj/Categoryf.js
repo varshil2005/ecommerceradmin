@@ -14,7 +14,7 @@ import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import {object, string} from 'yup';
-import { black } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
+import {black} from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 
 export default function Categoryf() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -24,14 +24,13 @@ export default function Categoryf() {
   // const [isconnected , setisconnected] = useState(true)
 
   useEffect(() => {
-
     getData();
-
-});
+  }, []);
 
   let userSchema = object({
-    
-    name : string().required('Please enter name').matches(/^[a-zA-Z ]+$/, 'Please enter valid name')
+    name: string()
+      .required('Please enter name')
+      .matches(/^[a-zA-Z ]+$/, 'Please enter valid name'),
   });
 
   let formik = useFormik({
@@ -40,58 +39,85 @@ export default function Categoryf() {
     },
 
     validationSchema: userSchema,
-    onSubmit : (values , {resetForm}) => {
-        console.log("dsdd",values.name);
-        handleSubmit1(values);
+    onSubmit: (values, {resetForm}) => {
+      console.log('dsdd', values.name);
+      handleSubmit1(values);
 
-        resetForm();
-    }
+      resetForm();
+    },
   });
 
- 
   const getData = async () => {
-    let categorydata = []
-    const category = await firestore().collection('Category').get().then(querySnapshot => {
+    let categorydata = [];
+    const category = await firestore()
+      .collection('Category')
+      .get()
+      .then(querySnapshot => {
         console.log(category);
         console.log('Total users: ', querySnapshot.size);
-    
-        querySnapshot.forEach(documentSnapshot => {
-        //   console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
-          
-          categorydata.push({Id : documentSnapshot.id ,  ...documentSnapshot.data()})
-            // console.log(data);
-            
-        });
-        
-      });;
-      setdata(categorydata)
-  };
 
- 
+        querySnapshot.forEach(documentSnapshot => {
+          //   console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
+
+          categorydata.push({
+            Id: documentSnapshot.id,
+            ...documentSnapshot.data(),
+          });
+          // console.log(data);
+        });
+      });
+    setdata(categorydata);
+  };
 
   const handleSubmit1 = async (data) => {
-    
     setModalVisible(!modalVisible);
-    await firestore()
-      .collection('Category')
-      .add(data)
-      .then(() => {
-        console.log('category added!'); 
-      });
+    console.log("hhhhhhh",update);
+    if (update) {
+      
+      await firestore()
+        .collection('Category')
+        .doc(update)
+        .set(data)
+        .then(() => {
+          console.log('User updated!');
+        });
+    } else {
+      await firestore()
+        .collection('Category')
+        .add(data)
+        .then(() => {
+          console.log('category added!');
+        });
+    }
 
-     
+    getData();
+    setupdate(null)
   };
 
-  const handleDelete = async (id) => {};
+  const handleDelete = async (id) => {
+    await firestore()
+      .collection('Category')
+      .doc(id)
+      .delete()
+      .then(() => {
+        console.log('delete', 'User deleted!');
+      });
 
-  const handleedit = async (id) => {};
+    getData(data);
+  };
 
+  const handleedit = async (data) => {
+    setModalVisible(true);
+    setValues(data)
+    setupdate(data.Id)
+    console.log("vvvvV",data);
+  };
 
-
-  const {handleBlur, handleChange, handleSubmit, errors, values, touched} = formik;
+  const {handleBlur, handleChange, handleSubmit, errors, values, touched, setValues} =
+    formik;
   console.log(values.name);
 
-  console.log("ssdsd",errors.name);
+  console.log('ssdsd', errors.name);
 
   return (
     <ScrollView style={{position: 'relative'}}>
@@ -112,16 +138,13 @@ export default function Categoryf() {
               name="category"
               placeholder="Category Name"
               style={style.input}
-              onChangeText={handleChange("name")}
+              onChangeText={handleChange('name')}
               value={values.name}
               onBlur={handleBlur('name')}
-              placeholderTextColor={'black'}
-              >
-              
-              
-             
-            </TextInput>
-            <Text style= {{color : 'red'}}>{errors.name && touched.name ? errors.name : ''}</Text>
+              placeholderTextColor={'black'}></TextInput>
+            <Text style={{color: 'red'}}>
+              {errors.name && touched.name ? errors.name : ''}
+            </Text>
             <Pressable
               style={style.submitbutton}
               onPress={() => handleSubmit()}>
@@ -143,12 +166,8 @@ export default function Categoryf() {
         </Text>
       </TouchableOpacity>
 
-      
-
-      { 
-         data .map((v, i) => (
-       
-        <View style={style.listname} key={v.Id}>
+      {data.map((v, i) => (
+        <View style={style.listname} key={i}>
           <Text style={style.listtext}>{v.name}</Text>
           <View style={{flexDirection: 'row', marginRight: 10}}>
             <TouchableOpacity
@@ -156,7 +175,7 @@ export default function Categoryf() {
               onPress={() => handleedit(v)}>
               <EvilIcons name="pencil" size={35} color="black"></EvilIcons>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleDelete(v.id)}>
+            <TouchableOpacity onPress={() => handleDelete(v.Id)}>
               <Text>
                 <MaterialIcons
                   name="delete"
