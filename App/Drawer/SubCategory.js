@@ -6,14 +6,38 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DropDownPicker from 'react-native-dropdown-picker';
 import firestore from '@react-native-firebase/firestore';
+import {useFormik} from 'formik';
+import {object, string, number, date, InferType, array, boolean} from 'yup';
 
 export default function SubCategory() {
   const [modalVisible, setModalVisible] = useState(false);
   const [data, setdata] = useState([]);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
-  console.log("dvdvvv", value);
-  const [items , setitems] = useState([]);
+  const [selectdrop, setSelectdrop] = useState('');
+  console.log('dvdvvv', value);
+  const [items, setitems] = useState([]);
+
+  let userSchema = object({
+    name: string()
+      .required('Please enter name')
+      .matches(/^[a-zA-Z ]+$/, 'Please enter valid name'),
+    dropdown: string().required('Please select category'),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      dropdown: '',
+    },
+
+    validationSchema: userSchema,
+
+    onSubmit: async (values, {resetForm}) => {
+      console.log(values);
+      setModalVisible(!modalVisible);
+    },
+  });
 
   useEffect(() => {
     getCategory();
@@ -35,18 +59,31 @@ export default function SubCategory() {
             Id: documentSnapshot.id,
             ...documentSnapshot.data(),
           });
-          
         });
       });
 
     setdata(categorydata);
-    setitems(categorydata.map(v => ({lable : v.Id , value : v.name})))
-    
+    setitems(categorydata.map(v => ({label: v.name, value: v.name})));
   };
+
   console.log('cccccccccccccccccccccc', data);
 
+  const {
+    handleChange,
+    errors,
+    values,
+    handleSubmit,
+    setFieldValue,
+    setValues,
+    touched,
+    handleBlur,
+  } = formik;
+
   return (
+   
     <View style={{position: 'relative'}}>
+
+
       <Modal
         //  isVisible={modalVisible}
         animationType="slide"
@@ -69,17 +106,41 @@ export default function SubCategory() {
               setOpen={setOpen}
               setValue={setValue}
               placeholder={'Choose Category.'}
+              placeholderTextColor = {'black'}
+              onChangeText={handleChange('dropdown')}
+              onSelectItem={items => setFieldValue('dropdown', items.value)}
+              onPress={() => setSelectdrop(!selectdrop)}
+              onBlur={handleBlur('dropdown')}   
+              itemTextStyle={{backgroundColor:"blue",textColor:"black"}}
+             baseColor="rgba(0, 0, 0, 1)"
+             dropDownContainerStyle={{ backgroundColor: 'white',zIndex: 1000, elevation: 1000 }}
               
             />
 
+
+
+            <Text style={{color: 'red', marginBottom: 20}}>
+              {!selectdrop && touched.dropdown ? '' : errors.dropdown}
+            </Text>
+
             <TextInput
-              name="category"
+              name="name"
               placeholder=" Sub Category Name"
               style={style.input}
-              placeholderTextColor={'black'}></TextInput>
+              placeholderTextColor={'black'}
+              onBlur={handleBlur('name')}
+              onChangeText={handleChange('name')}
+              value={values.name}></TextInput>
+
+            <Text style={{color: 'red'}}>
+              {errors.name && touched.name ? errors.name : ''}{' '}
+            </Text>
+
             <Pressable
               style={style.submitbutton}
-              onPress={() => setModalVisible(!modalVisible)}>
+              onPress={() => {
+                setModalVisible(!modalVisible), handleSubmit();
+              }}>
               <Text
                 style={{textAlign: 'center', paddingTop: 7, color: 'white'}}>
                 Submit
@@ -154,6 +215,7 @@ const style = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 0.5,
+    color: 'black',
   },
 
   centeredView: {
