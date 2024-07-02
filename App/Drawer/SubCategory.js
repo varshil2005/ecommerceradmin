@@ -1,19 +1,24 @@
 import {View, Text, StyleSheet, Pressable} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {TextInput, TouchableOpacity} from 'react-native-gesture-handler';
+import {
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native-gesture-handler';
 import Modal from 'react-native-modal';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DropDownPicker from 'react-native-dropdown-picker';
 import firestore from '@react-native-firebase/firestore';
 import {useFormik} from 'formik';
-import {object, string, number, date, InferType, array, boolean} from 'yup';
+import {object, string} from 'yup';
 
 export default function SubCategory() {
   const [modalVisible, setModalVisible] = useState(false);
   const [data, setdata] = useState([]);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
+  const [update, setupdate] = useState(null);
   const [selectdrop, setSelectdrop] = useState('');
   console.log('dvdvvv', value);
   const [items, setitems] = useState([]);
@@ -36,11 +41,14 @@ export default function SubCategory() {
     onSubmit: async (values, {resetForm}) => {
       console.log(values);
       setModalVisible(!modalVisible);
+      handleSubmit1(values);
+      resetForm();
     },
   });
 
   useEffect(() => {
     getCategory();
+    getData();
   }, []);
 
   const getCategory = async () => {
@@ -53,7 +61,35 @@ export default function SubCategory() {
         console.log('Total users: ', querySnapshot.size);
 
         querySnapshot.forEach(documentSnapshot => {
-          //   console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
+          console.log("jjjjj",'User ID: ', documentSnapshot.id);
+
+          categorydata.push({
+            Id: documentSnapshot.id,
+            ...documentSnapshot.data(),
+          });
+
+          console.log("lllllllll",categorydata);
+          const fcategory = categorydata.find((v) => v.Id === documentSnapshot.id)
+          console.log("name", fcategory);
+        });
+      });
+
+      
+    setdata(categorydata);
+    setitems(categorydata.map(v => ({label: v.name, value: v.Id})));
+  };
+
+  const getData = async () => {
+    let categorydata = [];
+    const SubCategory = await firestore()
+      .collection('Sub Category')
+      .get()
+      .then(querySnapshot => {
+        console.log(SubCategory);
+        console.log('Total users: ', querySnapshot.size);
+
+        querySnapshot.forEach(documentSnapshot => {
+          //  console.log("gggg",'User ID: ', documentSnapshot.id, documentSnapshot.data());
 
           categorydata.push({
             Id: documentSnapshot.id,
@@ -61,12 +97,54 @@ export default function SubCategory() {
           });
         });
       });
-
     setdata(categorydata);
-    setitems(categorydata.map(v => ({label: v.name, value: v.name})));
+    console.log('Data', categorydata);
   };
 
-  console.log('cccccccccccccccccccccc', data);
+  const handleSubmit1 = async data => {
+    setModalVisible(!modalVisible);
+    console.log('gggggggggggggggggggggggggggg', data);
+
+    if (update) {
+      
+      await firestore()
+        .collection('Sub Category')
+        .doc(update)
+        .set(data)
+        .then(() => {
+          console.log('User updated!');
+        });
+    } else {
+      await firestore()
+        .collection('Sub Category')
+        .add(data)
+        .then(() => {
+          console.log('category added!');
+        });
+    }
+
+    getData();
+    setupdate(null)
+  };
+
+  const handleDelete = async id => {
+    await firestore()
+      .collection('Sub Category')
+      .doc(id)
+      .delete()
+      .then(() => {
+        console.log('User deleted!');
+      });
+
+    getData(data);
+  };
+
+  const handleedit = async (data) => {
+    setModalVisible(true);
+    setValues(data)
+    setupdate(data.Id)
+    console.log("vvvvV",data);
+  }
 
   const {
     handleChange,
@@ -80,10 +158,7 @@ export default function SubCategory() {
   } = formik;
 
   return (
-   
-    <View style={{position: 'relative'}}>
-
-
+    <ScrollView style={{position: 'relative'}}>
       <Modal
         //  isVisible={modalVisible}
         animationType="slide"
@@ -106,21 +181,22 @@ export default function SubCategory() {
               setOpen={setOpen}
               setValue={setValue}
               placeholder={'Choose Category.'}
-              placeholderTextColor = {'black'}
+              placeholderTextColor={'black'}
               onChangeText={handleChange('dropdown')}
               onSelectItem={items => setFieldValue('dropdown', items.value)}
               onPress={() => setSelectdrop(!selectdrop)}
-              onBlur={handleBlur('dropdown')}   
-              itemTextStyle={{backgroundColor:"blue",textColor:"black"}}
-             baseColor="rgba(0, 0, 0, 1)"
-             dropDownContainerStyle={{ backgroundColor: 'white',zIndex: 1000, elevation: 1000 }}
-              
+              onBlur={handleBlur('dropdown')}
+              itemTextStyle={{backgroundColor: 'blue', textColor: 'black'}}
+              baseColor="rgba(0, 0, 0, 1)"
+              dropDownContainerStyle={{
+                backgroundColor: 'white',
+                zIndex: 1000,
+                elevation: 1000,
+              }}
             />
 
-
-
             <Text style={{color: 'red', marginBottom: 20}}>
-              {!selectdrop && touched.dropdown ? '' : errors.dropdown}
+              {!selectdrop && touched.dropdown ? errors.dropdown : ''}
             </Text>
 
             <TextInput
@@ -133,14 +209,10 @@ export default function SubCategory() {
               value={values.name}></TextInput>
 
             <Text style={{color: 'red'}}>
-              {errors.name && touched.name ? errors.name : ''}{' '}
+              {errors.name && touched.name ? errors.name : ''}
             </Text>
 
-            <Pressable
-              style={style.submitbutton}
-              onPress={() => {
-                setModalVisible(!modalVisible), handleSubmit();
-              }}>
+            <Pressable style={style.submitbutton} onPress={handleSubmit}>
               <Text
                 style={{textAlign: 'center', paddingTop: 7, color: 'white'}}>
                 Submit
@@ -159,27 +231,28 @@ export default function SubCategory() {
       </TouchableOpacity>
 
       <View style={style.listmainview}>
-        <View style={style.listname}>
-          <Text style={style.listtext}>Men</Text>
-          <Text style={style.SubCategoryname}>Shirts</Text>
-          <View style={{flexDirection: 'row', marginRight: 10}}>
-            <TouchableOpacity style={{marginRight: 20}}>
-              <Text>
-                <EvilIcons name="pencil" size={35} color="black"></EvilIcons>
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text>
-                <MaterialIcons
-                  name="delete"
-                  size={30}
-                  color="red"></MaterialIcons>
-              </Text>
-            </TouchableOpacity>
+        {data.map((v, i) => (
+          <View style={style.listname} key={i}>
+            <Text style={style.listtext}>{v.dropdown}</Text>
+            <Text style={style.listtext}>{v.name}</Text>
+            <View style={{flexDirection: 'row', marginRight: 10}}>
+              <TouchableOpacity style={{marginRight: 20}} onPress={() => handleedit(v)}>
+                <Text>
+                  <EvilIcons name="pencil" size={35} color="black"></EvilIcons>
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDelete(v.Id)}>
+                <Text>
+                  <MaterialIcons name="delete" size={30} color="red">
+                    
+                  </MaterialIcons>
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -254,13 +327,14 @@ const style = StyleSheet.create({
     // borderWidth : 2,
     // borderColor : 'white',
     marginHorizontal: 'auto',
-    marginTop: 70,
+    marginTop: 60,
     // backgroundColor : 'white',
   },
 
   listtext: {
-    fontSize: 20,
+    fontSize: 10,
     color: 'green',
+    marginLeft: '10',
   },
 
   listname: {
