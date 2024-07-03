@@ -1,30 +1,87 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler'
 import Modal from 'react-native-modal';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DropDownPicker from 'react-native-dropdown-picker';
+import firestore from '@react-native-firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function Product() {
     const [modalVisible, setModalVisible] = useState(false);
     const [open, setOpen] = useState(false);
+    const [data, setdata] = useState([]);
+  
     const [value, setValue] = useState(null);
-    const [items, setItems] = useState([
-        { label: 'Men', value: 'men' },
-        { label: 'Women', value: 'women' },
-        { label: 'Mens Shirt', value: 'mens shirt' },
-    ]);
-    const [modalVisible2, setModalVisible2] = useState(false);
+    const [items, setitems] = useState([]);
     const [open2, setOpen2] = useState(false);
     const [value2, setValue2] = useState(null);
 
-    const [items2, setItems2] = useState([
-      { label: 'Men', value: 'men' },
-      { label: 'Women', value: 'women' },
-      { label: 'Mens Shirt', value: 'mens shirt' },
-  ]);
+    const [items2, setitems2] = useState([]);
+
+  useEffect(() => {
+    getCategory();
+    // getData();
+  }, []);
+
+  const getCategory = async () => {
+    let categorydata = [];
+    const category = await firestore()
+      .collection('Category')
+      .get()
+      .then(querySnapshot => {
+        console.log(category);
+        console.log('Total users: ', querySnapshot.size);
+
+        querySnapshot.forEach(documentSnapshot => {
+          console.log("jjjjj",'User ID: ', documentSnapshot.id);
+
+          categorydata.push({
+            Id: documentSnapshot.id,
+            ...documentSnapshot.data(),
+          });
+        //   setcategory(categorydata);
+          console.log("lllllllll",categorydata);
+          
+        });
+      });
+
+      
+    setdata(categorydata);  
+    setitems(categorydata.map(v => ({label: v.name, value: v.Id})));
+  };
+
+  const getsubcategory = async  (id) => {
+    let Subcategorydata = [];
+        await firestore()
+        .collection('Sub Category')
+        .get()
+        .then(querySnapshot => {
+          console.log('Total users: ', querySnapshot.size);
+      
+          querySnapshot.forEach(documentSnapshot => {
+            console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
+            
+          Subcategorydata.push({
+            Id: documentSnapshot.id,
+            ...documentSnapshot.data(),
+          });
+          });
+
+          
+        });
+        
+       
+        const fdata = Subcategorydata.filter((v) => v.categoryid === id);
+        console.log("fdataaa",fdata);
+        
+        setdata(fdata);  
+        setitems2(fdata.map(v => ({label: v.name, value: v.Id})));
+        
+  }
+
 
     return (
         <View style={{ position: 'relative' }}>
@@ -43,15 +100,16 @@ export default function Product() {
                 <View style={style.centeredView}>
                     <View style={style.modalView}>
                         <Text style={style.modalText}>Add Product </Text>
-                        <View style = {style.dropdown1}>
+                        <View >
                         <DropDownPicker
                             open={open}
                             value={value}
                             items={items}
                             setOpen={setOpen}
                             setValue={setValue}
-                            setItems={setItems}
+                            setItems={setitems}
                             placeholder={'Choose Category.'}
+                           
                         />
                         </View>
 
@@ -62,8 +120,9 @@ export default function Product() {
                             items={items2}
                             setOpen={setOpen2}
                             setValue={setValue2}
-                            setItems={setItems2}
+                            setItems={setitems2}
                             placeholder={'Choose Sub Category.'}
+                            onChangeText={getsubcategory(value)}
                             
                         />
                         </View>
@@ -210,7 +269,7 @@ const style = StyleSheet.create({
 
     dropdown2 : {
     
-      zIndex : 1000
+      zIndex : 2000
     },
 
     dropdown2 : {

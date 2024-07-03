@@ -12,6 +12,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import firestore from '@react-native-firebase/firestore';
 import {useFormik} from 'formik';
 import {object, string} from 'yup';
+import { Dropdown } from 'react-native-element-dropdown';
 
 export default function SubCategory() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -22,18 +23,19 @@ export default function SubCategory() {
   const [selectdrop, setSelectdrop] = useState('');
   console.log('dvdvvv', value);
   const [items, setitems] = useState([]);
+  const [category , setcategory] = useState([]);
 
   let userSchema = object({
     name: string()
       .required('Please enter name')
       .matches(/^[a-zA-Z ]+$/, 'Please enter valid name'),
-    dropdown: string().required('Please select category'),
+      categoryid: string().required('Please select category'),
   });
 
   const formik = useFormik({
     initialValues: {
       name: '',
-      dropdown: '',
+      categoryid : '',
     },
 
     validationSchema: userSchema,
@@ -67,15 +69,15 @@ export default function SubCategory() {
             Id: documentSnapshot.id,
             ...documentSnapshot.data(),
           });
-
+          setcategory(categorydata);
           console.log("lllllllll",categorydata);
-          const fcategory = categorydata.find((v) => v.Id === documentSnapshot.id)
-          console.log("name", fcategory);
+          
         });
       });
 
       
     setdata(categorydata);
+    
     setitems(categorydata.map(v => ({label: v.name, value: v.Id})));
   };
 
@@ -126,7 +128,7 @@ export default function SubCategory() {
     getData();
     setupdate(null)
   };
-
+console.log("lllllllllllllllllllllllllllllllllllllllllllll",data);
   const handleDelete = async id => {
     await firestore()
       .collection('Sub Category')
@@ -157,6 +159,8 @@ export default function SubCategory() {
     handleBlur,
   } = formik;
 
+  console.log("cccccccccc",category);
+
   return (
     <ScrollView style={{position: 'relative'}}>
       <Modal
@@ -182,10 +186,10 @@ export default function SubCategory() {
               setValue={setValue}
               placeholder={'Choose Category.'}
               placeholderTextColor={'black'}
-              onChangeText={handleChange('dropdown')}
-              onSelectItem={items => setFieldValue('dropdown', items.value)}
+              onChangeText={handleChange('categoryid')}
+              onSelectItem={items => setFieldValue('categoryid', items.value)}
               onPress={() => setSelectdrop(!selectdrop)}
-              onBlur={handleBlur('dropdown')}
+              onBlur={handleBlur('categoryid')}
               itemTextStyle={{backgroundColor: 'blue', textColor: 'black'}}
               baseColor="rgba(0, 0, 0, 1)"
               dropDownContainerStyle={{
@@ -196,7 +200,7 @@ export default function SubCategory() {
             />
 
             <Text style={{color: 'red', marginBottom: 20}}>
-              {!selectdrop && touched.dropdown ? errors.dropdown : ''}
+              {!selectdrop && touched.categoryid ? errors.categoryid : ''}
             </Text>
 
             <TextInput
@@ -233,7 +237,7 @@ export default function SubCategory() {
       <View style={style.listmainview}>
         {data.map((v, i) => (
           <View style={style.listname} key={i}>
-            <Text style={style.listtext}>{v.dropdown}</Text>
+            <Text style={style.listtext}>{category.find((v1) => v.categoryid === v1.Id)?.name}</Text>
             <Text style={style.listtext}>{v.name}</Text>
             <View style={{flexDirection: 'row', marginRight: 10}}>
               <TouchableOpacity style={{marginRight: 20}} onPress={() => handleedit(v)}>
