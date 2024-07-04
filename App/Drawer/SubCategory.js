@@ -94,7 +94,7 @@ export default function SubCategory() {
           //  console.log("gggg",'User ID: ', documentSnapshot.id, documentSnapshot.data());
 
           categorydata.push({
-            Id: documentSnapshot.id,
+            Id : documentSnapshot.id,
             ...documentSnapshot.data(),
           });
         });
