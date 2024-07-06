@@ -1,6 +1,6 @@
 import {View, Text, StyleSheet, Pressable} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {TextInput, TouchableOpacity} from 'react-native-gesture-handler';
+import {ScrollView, TextInput, TouchableOpacity} from 'react-native-gesture-handler';
 import Modal from 'react-native-modal';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -105,12 +105,13 @@ export default function Product() {
             ...documentSnapshot.data(),
           });
         });
-        
+        setSubcategory(Subcategorydata);
       });
 
     const fdata = Subcategorydata.filter(v => v.categoryid === id);
     console.log('fdataaa', fdata);
-    setSubcategory(fdata);
+       
+    
     setdata(fdata);
     setitems2(fdata.map(v => ({label: v.name, value: v.Id})));
   };
@@ -199,7 +200,7 @@ export default function Product() {
   console.log('sssss', values);
 
   return (
-    <View style={{position: 'relative'}}>
+    <ScrollView style={{position: 'relative'}}>
       <Modal
         //  isVisible={modalVisible}
         animationType="slide"
@@ -343,7 +344,7 @@ export default function Product() {
           </View>
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
