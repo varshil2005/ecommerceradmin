@@ -10,11 +10,9 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useFormik, validateYupSchema, yupToFormErrors} from 'formik';
 import firestore from '@react-native-firebase/firestore';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import NetInfo from '@react-native-community/netinfo';
 import {object, string} from 'yup';
 import {black} from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function Categoryf() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -22,6 +20,11 @@ export default function Categoryf() {
   const [data, setdata] = useState([]);
   const [update, setupdate] = useState(null);
   // const [isconnected , setisconnected] = useState(true)
+
+  const dispatch = useDispatch();
+  
+  const category = useSelector(state => state.data);
+    
 
   useEffect(() => {
     getData();
@@ -48,25 +51,8 @@ export default function Categoryf() {
   });
 
   const getData = async () => {
-    let categorydata = [];
-    const category = await firestore()
-      .collection('Category')
-      .get()
-      .then(querySnapshot => {
-        console.log(category);
-        console.log('Total users: ', querySnapshot.size);
-
-        querySnapshot.forEach(documentSnapshot => {
-          //   console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
-
-          categorydata.push({
-            Id: documentSnapshot.id,
-            ...documentSnapshot.data(),
-          });
-          // console.log(data);
-        });
-      });
-    setdata(categorydata);
+      dispatch(getData());
+    setdata(category);
   };
 
   const handleSubmit1 = async (data) => {
