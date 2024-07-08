@@ -1,14 +1,17 @@
+import { CATEGORYDATA } from "../Actiontype"
 
-const data = {
-    data : null
+const data1 = {
+    data : []
 }
 
-export const categoryreader = (state = data , action) => {
+export const categoryreader = (state = data1 , action) => {
 
     switch (action.type) {
-        case 'CATEGORYDATA' : 
+        case CATEGORYDATA : 
             return {           
                 data : action.payload
             }
+        default  : 
+            return state
     }
 }
