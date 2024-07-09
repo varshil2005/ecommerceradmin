@@ -4,5 +4,5 @@ import { categoryreader } from "./category.reducer"
 
 export const rootReducer  = combineReducers({
     count : counterreader,
-    data : categoryreader
+    category : categoryreader
 })

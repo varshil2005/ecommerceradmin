@@ -13,6 +13,7 @@ import firestore from '@react-native-firebase/firestore';
 import {object, string} from 'yup';
 import {black} from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 import { useDispatch, useSelector } from 'react-redux';
+import { addCategory, deletecategoty, getcategory } from '../Redux/Action/category.action';
 
 export default function Categoryf() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -23,8 +24,8 @@ export default function Categoryf() {
 
   const dispatch = useDispatch();
   
-  const category = useSelector(state => state.data);
-    
+  const categoryd = useSelector(state => state.category);
+    console.log("ooooooooooo",categoryd.categorydata);
 
   useEffect(() => {
     getData();
@@ -50,14 +51,13 @@ export default function Categoryf() {
     },
   });
 
-  const getData = async () => {
-      dispatch(getData());
-    setdata(category);
+  const getData = () => {
+      dispatch(getcategory());
   };
 
   const handleSubmit1 = async (data) => {
     setModalVisible(!modalVisible);
-    console.log("hhhhhhh",update);
+    // console.log("hhhhhhh",update);
     if (update) {
       
       await firestore()
@@ -68,28 +68,16 @@ export default function Categoryf() {
           console.log('User updated!');
         });
     } else {
-      await firestore()
-        .collection('Category')
-        .add(data)
-        .then(() => {
-          console.log('category added!');
-        });
+      dispatch(addCategory(data));
     }
 
-    getData();
-    setupdate(null)
+    // getData();
+    // setupdate(null)
   };
 
   const handleDelete = async (id) => {
-    await firestore()
-      .collection('Category')
-      .doc(id)
-      .delete()
-      .then(() => {
-        console.log('delete', 'User deleted!');
-      });
+    dispatch(deletecategoty(id));
 
-    getData(data);
   };
 
   const handleedit = async (data) => {
@@ -152,7 +140,7 @@ export default function Categoryf() {
         </Text>
       </TouchableOpacity>
 
-      {data.map((v, i) => (
+      {categoryd.categorydata.map((v, i) => (
         <View style={style.listname} key={i}>
           <Text style={style.listtext}>{v.name}</Text>
           <View style={{flexDirection: 'row', marginRight: 10}}>
