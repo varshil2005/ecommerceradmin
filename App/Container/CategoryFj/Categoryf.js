@@ -12,20 +12,23 @@ import {useFormik, validateYupSchema, yupToFormErrors} from 'formik';
 import firestore from '@react-native-firebase/firestore';
 import {object, string} from 'yup';
 import {black} from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
-import { useDispatch, useSelector } from 'react-redux';
-import { addCategory, deletecategoty, getcategory } from '../Redux/Action/category.action';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  addCategory,
+  deletecategoty,
+  editcategory,
+  getcategory,
+} from '../Redux/Action/category.action';
 
 export default function Categoryf() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [name, setname] = useState('');
-  const [data, setdata] = useState([]);
   const [update, setupdate] = useState(null);
   // const [isconnected , setisconnected] = useState(true)
 
   const dispatch = useDispatch();
-  
+
   const categoryd = useSelector(state => state.category);
-    console.log("ooooooooooo",categoryd.categorydata);
+  console.log('ooooooooooo', categoryd.categorydata);
 
   useEffect(() => {
     getData();
@@ -45,53 +48,57 @@ export default function Categoryf() {
     validationSchema: userSchema,
     onSubmit: (values, {resetForm}) => {
       console.log('dsdd', values.name);
-      handleSubmit1(values);
 
-      resetForm();
+
+        handleSubmit1(values);
+       
+       resetForm();
     },
   });
 
   const getData = () => {
-      dispatch(getcategory());
+    dispatch(getcategory());
   };
 
-  const handleSubmit1 = async (data) => {
+  const handleSubmit1 = async data => {
     setModalVisible(!modalVisible);
     // console.log("hhhhhhh",update);
     if (update) {
-      
-      await firestore()
-        .collection('Category')
-        .doc(update)
-        .set(data)
-        .then(() => {
-          console.log('User updated!');
-        });
+      dispatch(editcategory(data))
     } else {
       dispatch(addCategory(data));
     }
 
+
     // getData();
-    // setupdate(null)
+     setupdate(null)
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
+    console.log('eeeeeeeeeeee', id);
     dispatch(deletecategoty(id));
-
   };
 
   const handleedit = async (data) => {
     setModalVisible(true);
     setValues(data)
-    setupdate(data.Id)
-    console.log("vvvvV",data);
+    setupdate(data.id)
+
   };
 
-  const {handleBlur, handleChange, handleSubmit, errors, values, touched, setValues} =
-    formik;
-  console.log(values.name);
 
-  console.log('ssdsd', errors.name);
+  const {
+    handleBlur,
+    handleChange,
+    handleSubmit,
+    errors,
+    values,
+    touched,
+    setValues,
+  } = formik;
+  // console.log(values.name);
+
+  // console.log('ssdsd', errors.name);
 
   return (
     <ScrollView style={{position: 'relative'}}>
@@ -124,7 +131,6 @@ export default function Categoryf() {
               onPress={() => handleSubmit()}>
               <Text
                 style={{textAlign: 'center', paddingTop: 7, color: 'white'}}>
-                {' '}
                 {update ? 'Update' : 'Submit'}
               </Text>
             </Pressable>
@@ -149,7 +155,7 @@ export default function Categoryf() {
               onPress={() => handleedit(v)}>
               <EvilIcons name="pencil" size={35} color="black"></EvilIcons>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleDelete(v.Id)}>
+            <TouchableOpacity onPress={() => handleDelete(v.id)}>
               <Text>
                 <MaterialIcons
                   name="delete"

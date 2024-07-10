@@ -1,4 +1,4 @@
-import { ADDCATEGORY, CATEGORYDATA, DELETECATEGORY } from "../Actiontype";
+import { ADDCATEGORY, CATEGORYDATA, DELETECATEGORY, UPDATECATEGORY } from "../Actiontype";
 import firestore from '@react-native-firebase/firestore';
 
 export const getcategory =  () => async(dispatch) =>  {
@@ -15,7 +15,7 @@ export const getcategory =  () => async(dispatch) =>  {
             // console.log("lllll",'User ID: ', documentSnapshot.id, documentSnapshot.data());
 
           categorydata.push({
-            Id: documentSnapshot.id,
+            id: documentSnapshot.id,
             ...documentSnapshot.data(),
 
             
@@ -50,12 +50,14 @@ export const addCategory = (data) => async(dispatch) => {
 }
 
 export const deletecategoty = (id) => async(dispatch) => {
+  
    try {
+    console.log("idddddddddddd",id);
     await firestore()
     .collection('Category')
     .doc(id)
     .delete()
-    .then(() => {
+    .then((doc) => {
       console.log('delete', 'User deleted!');
       dispatch({type : DELETECATEGORY , payload : id})
     });
@@ -65,10 +67,20 @@ export const deletecategoty = (id) => async(dispatch) => {
    }
 }
 
-export const editcategory = () => async(dispatch) => {
+export const editcategory = (data) => async(dispatch) => {
   try {
-    
+    console.log("hello sdjbs");
+    const temp = {...data};
+    delete temp.id;
+    console.log("temppp", temp);
+    await firestore()
+        .collection('Category')
+        .doc(data.id)
+        .set(temp)
+        .then(() => {
+          dispatch({type: UPDATECATEGORY , payload : data})
+        });
   } catch (error) {
-    
+    console.log(error);
   }
 }
