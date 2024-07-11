@@ -1,13 +1,13 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import Contact from '../Container/Contact';
+import Contact from '../../Container/Contact';
 import Category from './Category';
 import SubCategory from './SubCategory';
 import Product from './Product';
-import Category1 from '../Container/Category1';
-import Categoryf from '../Container/CategoryFj/Categoryf';
-import Counter from '../Container/Counter/Counter';
+import Category1 from '../../Container/Category1';
+import Categoryf from '../../Container/CategoryFj/Categoryf';
+import Counter from '../../Container/Counter/Counter';
 
 
 const Drawer = createDrawerNavigator();

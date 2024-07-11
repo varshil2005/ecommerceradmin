@@ -1,5 +1,5 @@
 import {View, Text, StyleSheet, Pressable} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useDebugValue, useEffect, useState} from 'react';
 import {
   ScrollView,
   TextInput,
@@ -13,17 +13,24 @@ import firestore from '@react-native-firebase/firestore';
 import {useFormik} from 'formik';
 import {object, string} from 'yup';
 import { Dropdown } from 'react-native-element-dropdown';
+import { useDispatch, useSelector } from 'react-redux';
+import { getcategory } from '../../Container/Redux/Action/category.action';
 
 export default function SubCategory() {
+
+
+
   const [modalVisible, setModalVisible] = useState(false);
   const [data, setdata] = useState([]);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [update, setupdate] = useState(null);
   const [selectdrop, setSelectdrop] = useState('');
-  console.log('dvdvvv', value);
-  const [items, setitems] = useState([]);
   const [category , setcategory] = useState([]);
+
+  const [items, setitems] = useState([]);
+  
+
 
   let userSchema = object({
     name: string()
@@ -48,60 +55,25 @@ export default function SubCategory() {
     },
   });
 
+
+  const categoryData = useSelector(state => state.category);
+  console.log("Avvvvv",categoryData);
+
+  const subcategoryData = useSelector(state => state.subcategory);
+  console.log("hhhhhhhhhhhhhh" , subcategoryData);
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    getCategory();
+    dispatch(getcategory());
     getData();
   }, []);
 
-  const getCategory = async () => {
-    let categorydata = [];
-    const category = await firestore()
-      .collection('Category')
-      .get()
-      .then(querySnapshot => {
-        console.log(category);
-        console.log('Total users: ', querySnapshot.size);
-
-        querySnapshot.forEach(documentSnapshot => {
-          console.log("jjjjj",'User ID: ', documentSnapshot.id);
-
-          categorydata.push({
-            Id: documentSnapshot.id,
-            ...documentSnapshot.data(),
-          });
-          setcategory(categorydata);
-          console.log("lllllllll",categorydata);
-          
-        });
-      });
-
-      
-    setdata(categorydata);
-    
-    setitems(categorydata.map(v => ({label: v.name, value: v.Id})));
-  };
 
   const getData = async () => {
-    let categorydata = [];
-    const SubCategory = await firestore()
-      .collection('Sub Category')
-      .get()
-      .then(querySnapshot => {
-        console.log(SubCategory);
-        console.log('Total users: ', querySnapshot.size);
-
-        querySnapshot.forEach(documentSnapshot => {
-          //  console.log("gggg",'User ID: ', documentSnapshot.id, documentSnapshot.data());
-
-          categorydata.push({
-            Id : documentSnapshot.id,
-            ...documentSnapshot.data(),
-          });
-        });
-      });
-    setdata(categorydata);
-    console.log('Data', categorydata);
+    dispatch(SubCategory());
+    // console.log('Data', categorydata);
   };
+
 
   const handleSubmit1 = async data => {
     setModalVisible(!modalVisible);
@@ -128,7 +100,7 @@ export default function SubCategory() {
     getData();
     setupdate(null)
   };
-console.log("lllllllllllllllllllllllllllllllllllllllllllll",data);
+// console.log("lllllllllllllllllllllllllllllllllllllllllllll",data);
   const handleDelete = async id => {
     await firestore()
       .collection('Sub Category')
@@ -179,7 +151,7 @@ console.log("lllllllllllllllllllllllllllllllllllllllllllll",data);
 
             <DropDownPicker
               open={open}
-              items={items}
+              items={categoryData.categorydata.map((v) => ({label: v.name, value: v.id}))}
               value={value}
               setItems={setitems}
               setOpen={setOpen}
@@ -237,7 +209,7 @@ console.log("lllllllllllllllllllllllllllllllllllllllllllll",data);
       <View style={style.listmainview}>
         {data.map((v, i) => (
           <View style={style.listname} key={i}>
-            <Text style={style.listtext}>{category.find((v1) => v.categoryid === v1.Id)?.name}</Text>
+            {/* <Text style={style.listtext}>{category.find((v1) => v.categoryid === v1.Id)?.name}</Text> */}
             <Text style={style.listtext}>{v.name}</Text>
             <View style={{flexDirection: 'row', marginRight: 10}}>
               <TouchableOpacity style={{marginRight: 20}} onPress={() => handleedit(v)}>

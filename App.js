@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import 'react-native-gesture-handler';
-import Drawer1 from './App/Drawer/Drawer';
+import Drawer1 from './App/Navigator/Drawer/Drawer';
 import { NavigationContainer } from '@react-navigation/native';
 
 import { configureStore } from './App/Container/Redux/store';
