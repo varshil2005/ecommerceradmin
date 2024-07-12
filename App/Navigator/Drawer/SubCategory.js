@@ -15,10 +15,9 @@ import {object, string} from 'yup';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useDispatch, useSelector } from 'react-redux';
 import { getcategory } from '../../Container/Redux/Action/category.action';
+import { addsubcategory, deletesubcategory, subCategory, updatesubcategory } from '../../Container/Redux/Action/subcategory.action';
 
 export default function SubCategory() {
-
-
 
   const [modalVisible, setModalVisible] = useState(false);
   const [data, setdata] = useState([]);
@@ -27,7 +26,6 @@ export default function SubCategory() {
   const [update, setupdate] = useState(null);
   const [selectdrop, setSelectdrop] = useState('');
   const [category , setcategory] = useState([]);
-
   const [items, setitems] = useState([]);
   
 
@@ -52,6 +50,7 @@ export default function SubCategory() {
       setModalVisible(!modalVisible);
       handleSubmit1(values);
       resetForm();
+      
     },
   });
 
@@ -66,59 +65,42 @@ export default function SubCategory() {
   useEffect(() => {
     dispatch(getcategory());
     getData();
-  }, []);
+  },[]);
 
 
   const getData = async () => {
-    dispatch(SubCategory());
+    dispatch(subCategory());
+    setcategory(categoryData.categorydata)
     // console.log('Data', categorydata);
   };
 
 
-  const handleSubmit1 = async data => {
+  const handleSubmit1 = async (data) => {
     setModalVisible(!modalVisible);
     console.log('gggggggggggggggggggggggggggg', data);
 
     if (update) {
-      
-      await firestore()
-        .collection('Sub Category')
-        .doc(update)
-        .set(data)
-        .then(() => {
-          console.log('User updated!');
-        });
+     dispatch(updatesubcategory(data))
     } else {
-      await firestore()
-        .collection('Sub Category')
-        .add(data)
-        .then(() => {
-          console.log('category added!');
-        });
+     dispatch(addsubcategory(data));
     }
 
-    getData();
     setupdate(null)
   };
 // console.log("lllllllllllllllllllllllllllllllllllllllllllll",data);
-  const handleDelete = async id => {
-    await firestore()
-      .collection('Sub Category')
-      .doc(id)
-      .delete()
-      .then(() => {
-        console.log('User deleted!');
-      });
-
+  const handleDelete = async (id) => {
+   dispatch(deletesubcategory(id));
     getData(data);
   };
 
   const handleedit = async (data) => {
     setModalVisible(true);
     setValues(data)
-    setupdate(data.Id)
+    setupdate(data.id)
     console.log("vvvvV",data);
   }
+  
+  console.log("oooooooooooooooooooooooo",value);
 
   const {
     handleChange,
@@ -131,7 +113,7 @@ export default function SubCategory() {
     handleBlur,
   } = formik;
 
-  console.log("cccccccccc",category);
+  // console.log("cccccccccc",category);
 
   return (
     <ScrollView style={{position: 'relative'}}>
@@ -169,6 +151,8 @@ export default function SubCategory() {
                 zIndex: 1000,
                 elevation: 1000,
               }}
+              
+              
             />
 
             <Text style={{color: 'red', marginBottom: 20}}>
@@ -191,7 +175,7 @@ export default function SubCategory() {
             <Pressable style={style.submitbutton} onPress={handleSubmit}>
               <Text
                 style={{textAlign: 'center', paddingTop: 7, color: 'white'}}>
-                Submit
+                {update ? 'Update' : 'Submit'}
               </Text>
             </Pressable>
           </View>
@@ -207,9 +191,9 @@ export default function SubCategory() {
       </TouchableOpacity>
 
       <View style={style.listmainview}>
-        {data.map((v, i) => (
+        {subcategoryData.subCategorydata.map((v, i) => (
           <View style={style.listname} key={i}>
-            {/* <Text style={style.listtext}>{category.find((v1) => v.categoryid === v1.Id)?.name}</Text> */}
+            <Text style={style.listtext}>{categoryData.categorydata.find((v1) => v.categoryid === v1.id)?.name}</Text>
             <Text style={style.listtext}>{v.name}</Text>
             <View style={{flexDirection: 'row', marginRight: 10}}>
               <TouchableOpacity style={{marginRight: 20}} onPress={() => handleedit(v)}>
@@ -217,7 +201,7 @@ export default function SubCategory() {
                   <EvilIcons name="pencil" size={35} color="black"></EvilIcons>
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleDelete(v.Id)}>
+              <TouchableOpacity onPress={() => handleDelete(v.id)}>
                 <Text>
                   <MaterialIcons name="delete" size={30} color="red">
                     
