@@ -134,7 +134,7 @@ export default function SubCategory() {
             <DropDownPicker
               open={open}
               items={categoryData.categorydata.map((v) => ({label: v.name, value: v.id}))}
-              value={value}
+              value={formik.values.categoryid}
               setItems={setitems}
               setOpen={setOpen}
               setValue={setValue}

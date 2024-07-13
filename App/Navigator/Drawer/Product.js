@@ -8,6 +8,9 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import firestore, { updateDoc } from '@react-native-firebase/firestore';
 import {number, object, string} from 'yup';
 import {useFormik} from 'formik';
+import { useDispatch, useSelector } from 'react-redux';
+import { getcategory } from '../../Container/Redux/Action/category.action';
+import { subCategory } from '../../Container/Redux/Action/subcategory.action';
 
 export default function Product() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -25,9 +28,20 @@ export default function Product() {
   const [Subcategory , setSubcategory] = useState([]);
 
   useEffect(() => {
-    getCategory();
+    // getCategory();
     getData();
+    dispatch(getcategory());
+    dispatch(subCategory());
   }, []);
+
+  const categoryData = useSelector(state => state.category);
+  // console.log("4..................",categoryData);
+
+  const subcategoryData = useSelector(state => state.subcategory);
+  //  console.log("4..................",subcategoryData.subCategorydata);
+
+  
+  const dispatch = useDispatch();
 
   let userSchema = object({
     name: string()
@@ -51,69 +65,53 @@ export default function Product() {
     validationSchema: userSchema,
 
     onSubmit: async (values, {resetForm}) => {
-      console.log('hhhhhhh');
+      // console.log('hhhhhhh');
       setModalVisible(!modalVisible);
-      console.log(values);
+      // console.log(values);
 
       handleSubmit1(values);
       resetForm();
     },
   });
 
-  const getCategory = async () => {
-    let categorydata = [];
-    await firestore()
-      .collection('Category')
-      .get()
-      .then(querySnapshot => {
-        console.log('Total users: ', querySnapshot.size);
+  // const getCategory = async () => {
+  //   let categorydata = [];
+  //   await firestore()
+  //     .collection('Category')
+  //     .get()
+  //     .then(querySnapshot => {
+  //       console.log('Total users: ', querySnapshot.size);
 
-        querySnapshot.forEach(documentSnapshot => {
-          console.log('jjjjj', 'User ID: ', documentSnapshot.id);
+  //       querySnapshot.forEach(documentSnapshot => {
+  //         console.log('jjjjj', 'User ID: ', documentSnapshot.id);
 
-          categorydata.push({
-            Id: documentSnapshot.id,
-            ...documentSnapshot.data(),
-          });
-          //   setcategory(categorydata);
-          console.log('lllllllll', categorydata);
-        });
-        setcategory(categorydata);
-      });
+  //         categorydata.push({
+  //           Id: documentSnapshot.id,
+  //           ...documentSnapshot.data(),
+  //         });
+  //         //   setcategory(categorydata);
+  //         console.log('lllllllll', categorydata);
+  //       });
+  //       setcategory(categorydata);
+  //     });
 
-    setdata(categorydata);
-    setitems(categorydata.map(v => ({label: v.name, value: v.Id})));
-  };
+  //   setdata(categorydata);
+  //   setitems(categorydata.map(v => ({label: v.name, value: v.Id})));
+  // };
 
-  const getsubcategory = async id => {
-    let Subcategorydata = [];
-    await firestore()
-      .collection('Sub Category')
-      .get()
-      .then(querySnapshot => {
-        console.log('Total users: ', querySnapshot.size);
+  const getsubcategory = (id) => {
 
-        querySnapshot.forEach(documentSnapshot => {
-          console.log(
-            'User ID: ',
-            documentSnapshot.id,
-            documentSnapshot.data(),
-          );
-
-          Subcategorydata.push({
-            Id: documentSnapshot.id,
-            ...documentSnapshot.data(),
-          });
-        });
-        setSubcategory(Subcategorydata);
-      });
-
-    const fdata = Subcategorydata.filter(v => v.categoryid === id);
+        
+   const fdata = subcategoryData.subCategorydata.filter(v => v.categoryid === id);
     console.log('fdataaa', fdata);
-       
-    
-    setdata(fdata);
-    setitems2(fdata.map(v => ({label: v.name, value: v.Id})));
+
+    const x = fdata.map(v => ({label: v.name, value: v.id}));
+
+
+    console.log("xxxxxxxxxxxxxxxx", x);
+
+      setitems2(x);
+      
   };
 
   const getData = async () => {
@@ -122,7 +120,7 @@ export default function Product() {
       .collection('Product')
       .get()
       .then(querySnapshot => {
-        console.log('Total users: ', querySnapshot.size);
+        // console.log('Total users: ', querySnapshot.size);
 
         querySnapshot.forEach(documentSnapshot => {
         //   console.log(
@@ -133,13 +131,13 @@ export default function Product() {
         //   );
 
           productdata.push({
-            Id: documentSnapshot.id,
+            id: documentSnapshot.id,
             ...documentSnapshot.data(),
           });
         });
       });
     setdata(productdata);
-    console.log('Data', productdata);
+    // console.log('Data', productdata);
   };
 
   const handleSubmit1 = async data => {
@@ -182,7 +180,7 @@ export default function Product() {
     setModalVisible(true);
     setValues(data)
     setupdate(data.Id)
-    console.log("vvvvV",data);
+    // console.log("vvvvV",data);
   }
 
   const {
@@ -196,8 +194,8 @@ export default function Product() {
     setValues
   } = formik;
 
-  console.log('rrrr', errors);
-  console.log('sssss', values);
+  // console.log('rrrr', errors);
+  // console.log('sssss', values);
 
   return (
     <ScrollView style={{position: 'relative'}}>
@@ -218,10 +216,10 @@ export default function Product() {
               <DropDownPicker
                 open={open}
                 value={value}
-                items={items}
+                // items={categoryData.categorydata.map((v) => ({label: v.name, value: v.id}))}
                 setOpen={setOpen}
                 setValue={setValue}
-                setItems={setitems}
+                setItems={(items) => setitems(items)}
                 placeholder={'Choose Category.'}
                 onChangeValue={() => getsubcategory(value)}
                 onChangeText={handleChange('category_id')}
@@ -244,7 +242,6 @@ export default function Product() {
                 items={items2}
                 setOpen={setOpen2}
                 setValue={setValue2}
-                setItems={setitems2}
                 placeholder={'Choose Sub Category.'}
                 onChangeText={handleChange('Subcategory_id')}
                 onSelectItem={items =>
@@ -317,7 +314,7 @@ export default function Product() {
         {data.map((v, i) => (
           <View style={style.listname}>
             <View>
-                <Text style={style.listtext}>{category.find((v1) => v.category_id === v1.Id)?.name}</Text>
+                <Text style={style.listtext}>{category.find((v1) => v.category_id === v1.id)?.name}</Text>
                 <Text style={style.listtext}>{Subcategory.find((v2) => v.Subcategory_id === v2.Id)?.name}</Text>
               <Text style={style.listtext}>{v.name}</Text>
               <Text style={style.listtext}>{v.price}</Text>
