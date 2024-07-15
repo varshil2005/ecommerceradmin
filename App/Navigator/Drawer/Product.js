@@ -11,6 +11,7 @@ import {useFormik} from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 import { getcategory } from '../../Container/Redux/Action/category.action';
 import { subCategory } from '../../Container/Redux/Action/subcategory.action';
+import { addproduct, deleteproduct, getproduct, updateproduct } from '../../Container/Redux/Action/product.action';
 
 export default function Product() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -27,18 +28,24 @@ export default function Product() {
   const [category , setcategory] = useState([]);
   const [Subcategory , setSubcategory] = useState([]);
 
+  const categoryData = useSelector(state => state.category);
+  // console.log("4..................",categoryData);
+  
+  
+  
+
+  const subcategoryData = useSelector(state => state.subcategory);
+  //  console.log("4..................",subcategoryData.subCategorydata);
+
+  const productdata = useSelector(state => state.product);
+  // console.log("productttttttttttttttttttttttt",productdata);
+
   useEffect(() => {
-    // getCategory();
+   
     getData();
     dispatch(getcategory());
     dispatch(subCategory());
   }, []);
-
-  const categoryData = useSelector(state => state.category);
-  // console.log("4..................",categoryData);
-
-  const subcategoryData = useSelector(state => state.subcategory);
-  //  console.log("4..................",subcategoryData.subCategorydata);
 
   
   const dispatch = useDispatch();
@@ -74,7 +81,7 @@ export default function Product() {
     },
   });
 
-  // const getCategory = async () => {
+   const getCategory = async () => {
   //   let categorydata = [];
   //   await firestore()
   //     .collection('Category')
@@ -95,47 +102,23 @@ export default function Product() {
   //       setcategory(categorydata);
   //     });
 
-  //   setdata(categorydata);
-  //   setitems(categorydata.map(v => ({label: v.name, value: v.Id})));
-  // };
+    // setdata(categorydata);
+    
+   };
 
-  const getsubcategory = (id) => {
+  // const getsubcategory = (id) => {
 
         
-   const fdata = subcategoryData.subCategorydata.filter(v => v.categoryid === id);
-    console.log('fdataaa', fdata);
-
-    const x = fdata.map(v => ({label: v.name, value: v.id}));
+  //  const fdata = subcategoryData.subCategorydata.filter(v => v.categoryid === id);
+  //   console.log('fdataaa', fdata);
 
 
-    console.log("xxxxxxxxxxxxxxxx", x);
-
-      setitems2(x);
+  //     setitems2(fdata.map(v => ({label: v.name, value: v.id})));
       
-  };
+  // };
 
   const getData = async () => {
-    let productdata = [];
-    await firestore()
-      .collection('Product')
-      .get()
-      .then(querySnapshot => {
-        // console.log('Total users: ', querySnapshot.size);
-
-        querySnapshot.forEach(documentSnapshot => {
-        //   console.log(
-        //     'gggg',
-        //     'User ID: ',
-        //     documentSnapshot.id,
-        //     documentSnapshot.data(),
-        //   );
-
-          productdata.push({
-            id: documentSnapshot.id,
-            ...documentSnapshot.data(),
-          });
-        });
-      });
+    dispatch(getproduct());
     setdata(productdata);
     // console.log('Data', productdata);
   };
@@ -143,44 +126,26 @@ export default function Product() {
   const handleSubmit1 = async data => {
 
     if (update) {
-      
-        await firestore()
-          .collection('Product')
-          .doc(update)
-          .set(data)
-          .then(() => {
-            console.log('User updated!');
-          });
+      dispatch(updateproduct(data))
       } else {
-        await firestore()
-        .collection('Product')
-        .add(data)
-        .then(() => {
-          console.log('Product added!');
-        });
+        dispatch(addproduct(data));
       }
    
-    getData();
+  
     setupdate(null)
   };
 
   const handleDelete = async id => {
-    await firestore()
-      .collection('Product')
-      .doc(id)
-      .delete()
-      .then(() => {
-        console.log('User deleted!');
-      });
-
+    dispatch(deleteproduct(id));
     getData(data);
   };
 
   const handleedit = async (data) => {
     setModalVisible(true);
     setValues(data)
-    setupdate(data.Id)
+    setupdate(data.id)
     // console.log("vvvvV",data);
+    // setSubcategory(data.category_id);
   }
 
   const {
@@ -215,13 +180,12 @@ export default function Product() {
             <View>
               <DropDownPicker
                 open={open}
-                value={value}
-                // items={categoryData.categorydata.map((v) => ({label: v.name, value: v.id}))}
+                value={formik.values.category_id}
+                 items={categoryData.categorydata.map((v) => ({label: v.name, value: v.id}))}
                 setOpen={setOpen}
                 setValue={setValue}
-                setItems={(items) => setitems(items)}
+                setItems={setitems}
                 placeholder={'Choose Category.'}
-                onChangeValue={() => getsubcategory(value)}
                 onChangeText={handleChange('category_id')}
                 onSelectItem={items =>
                   setFieldValue('category_id', items.value)
@@ -238,8 +202,8 @@ export default function Product() {
             <View style={style.dropdown2}>
               <DropDownPicker
                 open={open2}
-                value={value2}
-                items={items2}
+                value={formik.values.Subcategory_id}
+                items={subcategoryData.subCategorydata.filter(v => v.categoryid === value).map(v => ({label: v.name, value: v.id}))}
                 setOpen={setOpen2}
                 setValue={setValue2}
                 placeholder={'Choose Sub Category.'}
@@ -311,11 +275,11 @@ export default function Product() {
       </TouchableOpacity>
 
       <View style={style.listmainview}>
-        {data.map((v, i) => (
+        {productdata.productdata.map((v, i) => (
           <View style={style.listname}>
             <View>
-                <Text style={style.listtext}>{category.find((v1) => v.category_id === v1.id)?.name}</Text>
-                <Text style={style.listtext}>{Subcategory.find((v2) => v.Subcategory_id === v2.Id)?.name}</Text>
+                <Text style={style.listtext}>{categoryData.categorydata.find((v1) => v.category_id === v1.id)?.name}</Text>
+                <Text style={style.listtext}>{subcategoryData.subCategorydata.find((v2) => v.Subcategory_id === v2.id)?.name}</Text>
               <Text style={style.listtext}>{v.name}</Text>
               <Text style={style.listtext}>{v.price}</Text>
               <Text style={style.listtext}>{v.desc}</Text>
@@ -333,7 +297,7 @@ export default function Product() {
                     name="delete"
                     size={30}
                     color="red"
-                    onPress={() => handleDelete(v.Id)}
+                    onPress={() => handleDelete(v.id)}
                     ></MaterialIcons>
                 </Text>
               </TouchableOpacity>
