@@ -19,20 +19,23 @@ import {
   editcategory,
   getcategory,
 } from '../Redux/Action/category.action';
+import {addbrand, deletebrand, getBrand, updatebrand} from '../Redux/Slice/Brand.slice';
 
-export default function Categoryf() {
+export default function Brand() {
   const [modalVisible, setModalVisible] = useState(false);
   const [update, setupdate] = useState(null);
   // const [isconnected , setisconnected] = useState(true)
 
   const dispatch = useDispatch();
 
-  const categoryd = useSelector(state => state.category);
-  console.log('ooooooooooo', categoryd.categorydata);
-
   useEffect(() => {
-    getData();
+    dispatch(getBrand());
   }, []);
+
+  const brandd = useSelector(state => state.Brand);
+  console.log('ooooooooooo', brandd.branddata);
+
+
 
   let userSchema = object({
     name: string()
@@ -47,45 +50,39 @@ export default function Categoryf() {
 
     validationSchema: userSchema,
     onSubmit: (values, {resetForm}) => {
+      setModalVisible(false);
       console.log('dsdd', values.name);
 
+      handleSubmit1(values);
 
-        handleSubmit1(values);
-       
-       resetForm();
+      resetForm();
     },
   });
 
-  const getData = () => {
-    dispatch(getcategory());
-  };
+
 
   const handleSubmit1 = async data => {
     setModalVisible(!modalVisible);
     // console.log("hhhhhhh",update);
     if (update) {
-      dispatch(editcategory(data))
+      dispatch(updatebrand(data))
     } else {
-      dispatch(addCategory(data));
+    dispatch(addbrand(data));
     }
-
-
-     getData();
-     setupdate(null)
+    setupdate(null);
   };
 
-  const handleDelete = async id => {
-    console.log('eeeeeeeeeeee', id);
-    dispatch(deletecategoty(id));
-  };
+    const handleDelete = async id => {
+      console.log('eeeeeeeeeeee', id);
+      dispatch(deletebrand(id));
+    };
 
-  const handleedit = async (data) => {
-    setModalVisible(true);
-    setValues(data)
-    setupdate(data.id)
+    const handleedit = async (data) => {
+      setModalVisible(true);
+      setValues(data)
+      setupdate(data.id)
 
-  };
-
+    };
 
   const {
     handleBlur,
@@ -114,13 +111,13 @@ export default function Categoryf() {
       >
         <View style={style.centeredView}>
           <View style={style.modalView}>
-            <Text style={style.modalText}>Add Category Name</Text>
+            <Text style={style.modalText}>Add Brand Name</Text>
             <TextInput
-              name="category"
-              placeholder="Category Name"
+              name="Brand"
+              placeholder="Brand Name"
               style={style.input}
               onChangeText={handleChange('name')}
-              value={values.name}
+                value={values.name}
               onBlur={handleBlur('name')}
               placeholderTextColor={'black'}></TextInput>
             <Text style={{color: 'red'}}>
@@ -131,7 +128,7 @@ export default function Categoryf() {
               onPress={() => handleSubmit()}>
               <Text
                 style={{textAlign: 'center', paddingTop: 7, color: 'white'}}>
-                {update ? 'Update' : 'Submit'}
+                {update ? 'Update' : 'Submit'} 
               </Text>
             </Pressable>
           </View>
@@ -142,20 +139,25 @@ export default function Categoryf() {
         style={style.button}
         onPress={() => setModalVisible(true)}>
         <Text style={{textAlign: 'center', paddingTop: 7, color: 'white'}}>
-          ADD Category
+          ADD Brand
         </Text>
       </TouchableOpacity>
 
-      {categoryd.categorydata.map((v, i) => (
-        <View style={style.listname} key={i}>
+      {
+      
+      brandd.branddata.map((v,i) => (
+        <View style={style.listname}>
           <Text style={style.listtext}>{v.name}</Text>
           <View style={{flexDirection: 'row', marginRight: 10}}>
             <TouchableOpacity
               style={{marginRight: 20}}
-              onPress={() => handleedit(v)}>
+                onPress={() => handleedit(v)}
+            >
               <EvilIcons name="pencil" size={35} color="black"></EvilIcons>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleDelete(v.id)}>
+            <TouchableOpacity
+             onPress={() => handleDelete(v.id)}
+            >
               <Text>
                 <MaterialIcons
                   name="delete"

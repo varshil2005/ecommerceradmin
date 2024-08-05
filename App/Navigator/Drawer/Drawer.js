@@ -8,6 +8,7 @@ import Product from './Product';
 import Category1 from '../../Container/Category1';
 import Categoryf from '../../Container/CategoryFj/Categoryf';
 import Counter from '../../Container/Counter/Counter';
+import Brand from '../../Container/Brand/Brand';
 
 
 const Drawer = createDrawerNavigator();
@@ -21,6 +22,7 @@ export default function Drawer1() {
             <Drawer.Screen name="Product" component={Product} />
             <Drawer.Screen name="Categoryf" component={Categoryf} />
             <Drawer.Screen name="counter" component={Counter} />
+            <Drawer.Screen name="Brand" component={Brand} />
         </Drawer.Navigator>
     )
 }

@@ -2,33 +2,7 @@ import { ADDCATEGORY, CATEGORYDATA, DELETECATEGORY, UPDATECATEGORY } from "../Ac
 import firestore from '@react-native-firebase/firestore';
 
 export const getcategory =  () => async(dispatch) =>  {
-    try {
-      let categorydata = [];
-    await firestore()
-      .collection('Category')
-      .get()
-      .then(querySnapshot => {
-
-        console.log('Total users: ', querySnapshot.size);
-
-        querySnapshot.forEach(documentSnapshot => {
-            // console.log("lllll",'User ID: ', documentSnapshot.id, documentSnapshot.data());
-
-          categorydata.push({
-            id: documentSnapshot.id,
-            ...documentSnapshot.data(),
-
-            
-          });
-          // console.log(data);
-          console.log("hhhhhhhh",categorydata);
-        });
-      });
-
-      dispatch({type : CATEGORYDATA ,payload : categorydata})
-    } catch (error) {
-      console.log(error);
-    }
+      
     
 }
 
